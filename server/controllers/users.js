@@ -33,6 +33,7 @@ checkArtists = (user, req, next) => {
               artist.status = 'artist';            
               req.auth = 'AUTHORIZED';
               req.token = jwt.encode(key, {artist}).value;
+              req.status = 'artist';
               return next();
             }
           })
@@ -49,6 +50,7 @@ checkArtists = (user, req, next) => {
             req.auth = 'AUTHORIZED';
             artist.status = 'artist';
             req.token = jwt.encode(key, {artist}).value;
+            req.status = 'artist';
             return next();
           }
         }
@@ -96,17 +98,31 @@ const verifyAccessToken = (req, res, next) => {
           
           req.auth = 'AUTHORIZED';
           req.token = jwt.encode(key, {admin}).value;
+          req.status = 'admin';
           return next();
         });
       if(user.hash){
         user.hash !== admin.hash ? req.auth = 'UNAUTHORIZED' : req.auth = 'AUTHORIZED';
         req.token = jwt.encode(key, {admin}).value;
+        req.status = 'admin';
         return next();
       }
     })
   }
 
 } 
+
+artistCount = (req, res, next) => {
+  Artist.find({})
+  .exec((err, artists) => {
+    if(err || !artists.length){
+      req.count = 0;
+      return next();
+    }
+    req.count = artists.length;
+    next(); 
+  })
+}
 
 // Routes
 const status = (req, res) => res.send(req.status);
@@ -146,5 +162,6 @@ module.exports = {
   verify,
   verifyAccessToken,
   createAdmin,
-  userExist
+  userExist,
+  artistCount
 }
