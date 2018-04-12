@@ -32,7 +32,7 @@ checkArtists = (user, req, next) => {
               console.log('Found');
               artist.status = 'artist';            
               req.auth = 'AUTHORIZED';
-              req.token = jwt.encode(key, artist).value;
+              req.token = jwt.encode(key, {artist}).value;
               return next();
             }
           })
@@ -61,13 +61,14 @@ const checkSystem = (req, res, next) => {
   Admin.find({})
   .exec((err, r) => { 
     err || !r.length ?  req.status = 'unactive' : req.status = 'active';
-    next();
+    return next();
   });
 }
 
 const verifyAccessToken = (req, res, next) => {
-  if(!req.headers.authorization) return res.json('ACCESS TOKEN REQUIRED');
+  if(!req.headers.authorization) return res.send('ACCESS TOKEN REQUIRED');
   const token = req.headers.authorization.split('Bearer ').reverse()[0];
+  console.log(token);
   if(req.status === 'unactive'){
     // verify system access token
     Settings.findOne({key: 'ACCESS_TOKEN'})
@@ -82,21 +83,17 @@ const verifyAccessToken = (req, res, next) => {
   }
   if(req.status === 'active') {
     req.auth = "UNAUTHORIZED";
-    const user = jwt.decode(key, req.headers.authorization).value;
+    let user = jwt.decode(key, req.headers.authorization).value;
     if(!user) return next();
     console.log(user);
+    user.admin ? user = user.admin : user.artist ? user = user.artist : null; 
     Admin.findOne({username: user.username})
     .exec((err, admin) => {
-      if(err || !admin) {
-        // CHECK ARTISTS
-        return checkArtists(user, req, next);
-      };
+      if(err || !admin) return checkArtists(user, req, next);
       if(user.pass)
         bcrypt.compare(user.pass, admin.hash, (err, same) => {
-          if(err || !same) {
-            // CHECK ARTISTS
-            return checkArtists(user, req, next);        
-          }
+          if(err || !same) return checkArtists(user, req, next);        
+          
           req.auth = 'AUTHORIZED';
           req.token = jwt.encode(key, {admin}).value;
           return next();
@@ -123,19 +120,13 @@ const createAdmin = (req, res) => {
   const {username, name, password} = jwt.decode(key, req.body.token).value;
   bcrypt.hash(password, 11, (err, hash) => {
     if(err || !hash) return res.send('FAILED TO ENCRYPT');
-    const fields = {
-      username,
-      name,
-      hash
-    }
-    const admin = new Admin(fields);
+    const admin = new Admin({username, name, hash});
     admin.save((e) => {
       if(e) return res.json(e);
-      const token = jwt.encode(key, admin).value;
+      const token = jwt.encode(key, {admin}).value;
       res.json({access: req.auth, token});
     });
   });
- // res.json(user);
 }
 
 const userExist = (req, res) => {
