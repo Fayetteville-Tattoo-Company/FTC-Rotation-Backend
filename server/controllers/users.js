@@ -1,8 +1,60 @@
+
 const Admin = require('../../data/models/AdminModel');
+const Artist = require('../../data/models/ArtistModel');
 const Settings = require('../../data/models/SettingsModel');
 const key = require('../config.json').secret;
 const bcrypt = require('bcrypt');
 const jwt = require('json-web-token');
+
+//Check Artist 
+checkArtists = (user, req, next) => {
+  console.log('CHECKING ARTISTS');
+  if(user)
+    Artist.findOne({username: user.username})
+    .exec((err, artist) => {
+      if(err || !artist){
+        req.auth = 'UNAUTHORIZED';
+        req.token = undefined;
+        return next();
+      }
+
+      if(artist){
+        if(user.pass){
+          bcrypt.compare(user.pass, artist.hash, (e, same) => {
+            console.log(user.pass);
+            if(e || !same){
+              console.log('Not Found');              
+              req.auth='UNAUTHORIZED';
+              req.token=undefined;
+              return next();
+            }
+            if(same){
+              console.log('Found');
+              artist.status = 'artist';            
+              req.auth = 'AUTHORIZED';
+              req.token = jwt.encode(key, artist).value;
+              return next();
+            }
+          })
+        }
+        if(user.hash){
+          if(user.hash !== artist.hash){
+            console.log('Not Found');
+            req.auth = 'UNAUTHORIZED';
+            req.token = undefined;
+            return next();
+          }
+          if(user.hash === artist.hash){
+            console.log('Found');
+            req.auth = 'AUTHORIZED';
+            artist.status = 'artist';
+            req.token = jwt.encode(key, {artist}).value;
+            return next();
+          }
+        }
+      }
+    })
+}
 
 // Middleware
 const checkSystem = (req, res, next) => {
@@ -14,7 +66,7 @@ const checkSystem = (req, res, next) => {
 }
 
 const verifyAccessToken = (req, res, next) => {
-  if(!req.headers.authorization) res.json('ACCESS TOKEN REQUIRED');
+  if(!req.headers.authorization) return res.json('ACCESS TOKEN REQUIRED');
   const token = req.headers.authorization.split('Bearer ').reverse()[0];
   if(req.status === 'unactive'){
     // verify system access token
@@ -22,33 +74,38 @@ const verifyAccessToken = (req, res, next) => {
     .exec((err, setting) => {
       if(err || !setting) return res.json('Error Finding Setting');
       bcrypt.compare(token, setting.value, (err, same) => {
-        err || !same ? res.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
-        next();
+        err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
+        console.log(req.auth);
+        return next();
       })
     })
   }
   if(req.status === 'active') {
     req.auth = "UNAUTHORIZED";
-    const test = jwt.encode(key, {username: 'bob', pass: 'bob'}).value;
     const user = jwt.decode(key, req.headers.authorization).value;
-    console.log(test);
     if(!user) return next();
+    console.log(user);
     Admin.findOne({username: user.username})
     .exec((err, admin) => {
       if(err || !admin) {
         // CHECK ARTISTS
-        console.log("no admin found by that name");
-        return next();
+        return checkArtists(user, req, next);
       };
-      bcrypt.compare(user.pass, admin.hash, (err, same) => {
-        if(err || !same) {
-          // CHECK ARTISTS
-          console.log("admin hash unmatched"); 
-          return next()         
-        }
-        req.auth = 'AUTHORIZED';
+      if(user.pass)
+        bcrypt.compare(user.pass, admin.hash, (err, same) => {
+          if(err || !same) {
+            // CHECK ARTISTS
+            return checkArtists(user, req, next);        
+          }
+          req.auth = 'AUTHORIZED';
+          req.token = jwt.encode(key, {admin}).value;
+          return next();
+        });
+      if(user.hash){
+        user.hash !== admin.hash ? req.auth = 'UNAUTHORIZED' : req.auth = 'AUTHORIZED';
+        req.token = jwt.encode(key, {admin}).value;
         return next();
-      });
+      }
     })
   }
 
@@ -57,14 +114,39 @@ const verifyAccessToken = (req, res, next) => {
 // Routes
 const status = (req, res) => res.send(req.status);
 const verify = (req, res) => {
-  res.send(req.auth);
+  res.send({access:req.auth, token: req.token});
 }
 
 
 const createAdmin = (req, res) => {
   if(!req.auth || req.auth === 'UNAUTHORIZED') return res.send("UNAUTHORIZED");
-  res.send(req.auth);
+  const {username, name, password} = jwt.decode(key, req.body.token).value;
+  bcrypt.hash(password, 11, (err, hash) => {
+    if(err || !hash) return res.send('FAILED TO ENCRYPT');
+    const fields = {
+      username,
+      name,
+      hash
+    }
+    const admin = new Admin(fields);
+    admin.save((e) => {
+      if(e) return res.json(e);
+      const token = jwt.encode(key, admin).value;
+      res.json({access: req.auth, token});
+    });
+  });
+ // res.json(user);
+}
 
+const userExist = (req, res) => {
+  if(!req.auth || req.auth === 'UNAUTHORIZED') return res.send("UNAUTHORIZED");
+  Admin.findOne({username: req.params.username})
+  .exec((err, user) => {
+    if(err || !user){
+      return res.json(1);
+    }
+    if(user) return res.json(0);
+  });
 }
 
 module.exports = {
@@ -72,6 +154,6 @@ module.exports = {
   status,
   verify,
   verifyAccessToken,
-  createAdmin
-
+  createAdmin,
+  userExist
 }
