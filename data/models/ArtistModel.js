@@ -16,10 +16,10 @@ const ArtistSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  appointments: [{
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: 'appointment'
-  }]
+  location: {
+    type: Number,
+    required: true
+  }
 });
 
 module.exports = mongoose.model('Artist', ArtistSchema);

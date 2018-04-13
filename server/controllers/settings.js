@@ -28,7 +28,9 @@ rotate = (req, res) => {
   });
 }
 
+
 module.exports = {
   currentRotation,
-  rotate
+  rotate,
+  addInvite
 }

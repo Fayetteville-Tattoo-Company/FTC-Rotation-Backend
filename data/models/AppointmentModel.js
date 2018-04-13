@@ -6,13 +6,19 @@ const AppointmentSchema = new mongoose.Schema({
     required: true,
     lowercase: true
   },
-  rotationID: {
+  number: {
+    type: String
+  },
+    rotationID: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: 'Rotation',
     required: true
   },
   date: {
     type: Date 
+  },
+  time: {
+    type: String
   },
   createdAt: {
     type: Date,
