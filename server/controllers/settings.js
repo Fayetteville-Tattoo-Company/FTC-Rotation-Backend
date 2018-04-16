@@ -1,7 +1,7 @@
 const Settings = require('../../data/models/SettingsModel');
 const Artist = require('../../data/models/ArtistModel');
 const jwt = require('json-web-token');
-const key = process.env.KEY || require('../config.json').secret;
+const key = process.env.KEY;
 
 currentRotation = (req, res) => {
   if(req.auth !== 'AUTHORIZED') return res.send('UNAUTHORIZED');

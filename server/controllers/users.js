@@ -5,8 +5,8 @@ const Admin = require('../../data/models/AdminModel');
 const Artist = require('../../data/models/ArtistModel');
 const Settings = require('../../data/models/SettingsModel');
 const Invite = require('../../data/models/InviteModel');
-const key = require('../config.json').secret;
-const server = require('../config.json').server;
+const key = process.env.KEY;
+const server = process.env.SERVER;
 const bcrypt = require('bcrypt');
 const jwt = require('json-web-token');
 
