@@ -5,7 +5,7 @@ mongoose.Promise = global.Promise;
 const connect = mongoose.connect(`mongodb://<dbuser>:<dbpassword>@ds143099.mlab.com:43099/heroku_6v7tqx6q`);
 connect.then(() => {
   console.log("MongoDB Server Running : 7777");
-  server.listen(port, () => console.log(`Main Server Running : ${port}`));
 })
 .catch((err) => console.log("ERROR STARTING SERVERS", err));
+server.listen(port, () => console.log(`Main Server Running : ${port}`));
 
