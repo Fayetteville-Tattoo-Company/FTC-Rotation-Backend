@@ -2,7 +2,7 @@ const Appointment = require('../../data/models/AppointmentModel');
 const Rotation = require('../../data/models/RotationModel');
 const Artist = require('../../data/models/ArtistModel');
 const jwt = require('json-web-token');
-const key = require('../config.json').secret;
+const key = process.env.KEY;
 
 const findAppointments = (req, res) => {
   if(!req.auth || req.auth === 'UNAUTHORIZED') return res.send('UNAUTHORIZED');
