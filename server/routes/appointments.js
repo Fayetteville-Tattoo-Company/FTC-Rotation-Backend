@@ -1,10 +1,11 @@
 const {
   findAppointments,
-  addAppointment
+  addAppointment,
+  removeAppointment
 } = require('../controllers/appointments');
 const auth = require('../controllers/users');
 
 module.exports = (route) => {
   route.get('/appointments', auth.checkSystem, auth.verifyAccessToken, findAppointments);
-  //route.post('/create-appointment', auth.checkSystem, auth.verifyAccessToken, addAppointment);
+  route.delete('/remove-appointment/:id', auth.checkSystem, auth.verifyAccessToken, removeAppointment);
 }

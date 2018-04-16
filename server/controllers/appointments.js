@@ -38,7 +38,12 @@ addAppointment = (req, res, next) => {
   })
 }
 
+removeAppointment = (req, res) => {
+  res.send(req.params.id);
+}
+
 module.exports = {
   findAppointments,
-  addAppointment
+  addAppointment, 
+  removeAppointment
 }

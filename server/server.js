@@ -2,7 +2,7 @@ const server = require('./');
 const mongoose = require('mongoose');
 const port = process.env.PORT || 5000;
 mongoose.Promise = global.Promise;
-const connect = mongoose.connect(`mongodb://localhost:7777/test`);
+const connect = mongoose.connect(`mongodb://<dbuser>:<dbpassword>@ds143099.mlab.com:43099/heroku_6v7tqx6q`);
 connect.then(() => {
   console.log("MongoDB Server Running : 7777");
   server.listen(port, () => console.log(`Main Server Running : ${port}`));
