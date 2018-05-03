@@ -1,11 +1,13 @@
 const Appointment = require('../../data/models/AppointmentModel');
 const Rotation = require('../../data/models/RotationModel');
 const Artist = require('../../data/models/ArtistModel');
+const {log} = require('../../tools');
 const jwt = require('json-web-token');
 const key = process.env.KEY;
 
+
 const findAppointments = (req, res) => {
-  if(!req.auth || req.auth === 'UNAUTHORIZED') return res.send('UNAUTHORIZED');
+  if(!req.auth || req.auth === 'UNAUTHORIZED' || !req.token) return res.send('UNAUTHORIZED');
   if(req.auth === 'AUTHORIZED'){
     const user = jwt.decode(key, req.token).value;
     
@@ -17,7 +19,7 @@ const findAppointments = (req, res) => {
       if(err || !appointments.length) return res.json([]);
       if(user.admin) return res.send(appointments);
       if(user.artist) return res.send(appointments.filter((appointment) => {
-        console.log(appointment.rotationID.artist.username, user.artist.username);
+        log(appointment.rotationID.artist.username, user.artist.username);
         return appointment.rotationID.artist.username === user.artist.username
       }));
     });   
@@ -32,7 +34,7 @@ addAppointment = (req, res, next) => {
   newRotation.save((err) => {
     const newAppointment = new Appointment({client: req.body.client, number: req.body.number, date: req.body.date, time: req.body.time, rotationID: newRotation._id, createdAt: Date.now()});
     newAppointment.save((e) => {
-      console.log('CREATED');
+      log('CREATED');
       return next();
     });
   })

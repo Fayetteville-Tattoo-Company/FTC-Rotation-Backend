@@ -1,6 +1,5 @@
 
 const {email} = require('./emailer');
-
 const Admin = require('../../data/models/AdminModel');
 const Artist = require('../../data/models/ArtistModel');
 const Settings = require('../../data/models/SettingsModel');
@@ -9,6 +8,7 @@ const key = process.env.KEY;
 const server = process.env.SERVER;
 const bcrypt = require('bcrypt');
 const jwt = require('json-web-token');
+const {log} = require('../../tools');
 
 
 //Check Artist 
@@ -67,6 +67,7 @@ const checkSystem = (req, res, next) => {
 }
 
 const verifyAccessToken = (req, res, next) => {
+  
   if(!req.headers.authorization) return res.send('ACCESS TOKEN REQUIRED');
   const token = req.headers.authorization.split('Bearer ').reverse()[0];
   if(req.status === 'unactive'){
@@ -80,11 +81,11 @@ const verifyAccessToken = (req, res, next) => {
       })
     })
   }
-  if(req.status === 'active') {
+  if(req.status === 'active' && req.headers.authorization) {
     req.auth = "UNAUTHORIZED";
     let user = jwt.decode(key, req.headers.authorization).value;
     if(!user) return next();
-    console.log(user);
+    log(user);
     user.admin ? user = user.admin : user.artist ? user = user.artist : null; 
     Admin.findOne({username: user.username})
     .exec((err, admin) => {
@@ -188,7 +189,7 @@ sendMail = (req, res, next) => {
 
 addInvite = (req, res) => {
   if(req.sent !== 'SUCCESS') return res.send("FAILED");
-  console.log(req.keyHash);
+  log(req.keyHash);
   Invite.findOne({email: req.body.email})
   .exec((err, invite) => {
     if(err || !invite) {
@@ -232,8 +233,8 @@ createInvite = (req, res) => {
                   user.save((er) => {
                     if(er) return res.send("FAILED TO SAVE");
                     Invite.findOneAndRemove({email: req.body.email})
-                    .then((re) => console.log('REMOVED'))
-                    .catch((err) => console.log('ERROR REMOVING'));
+                    .then((re) => log('REMOVED'))
+                    .catch((err) => log('ERROR REMOVING'));
 
                     return res.json({status: 'SUCCESS', token: jwt.encode(key, user).value});
                   })
