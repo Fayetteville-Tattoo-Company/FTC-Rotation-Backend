@@ -71,7 +71,7 @@ const verifyAccessToken = (req, res, next) => {
   if(!req.headers.authorization) return res.send('ACCESS TOKEN REQUIRED');
   const token = req.headers.authorization.split('Bearer ').reverse()[0];
   if(req.status === 'unactive'){
-    const access_token = jwt.decode(key, req.headers.authorization.split('Bearer ').reverse()[0]).value;
+    const access_key = jwt.decode(key, req.headers.authorization.split('Bearer ').reverse()[0]).value;
     // DB SETTINGS METHOD
     // verify system access token
     // Settings.findOne({key: 'ACCESS_TOKEN'})
@@ -84,9 +84,9 @@ const verifyAccessToken = (req, res, next) => {
     // })
 
     // ENVIORNMENT METHOD
-    bcrypt.compare(access_token, process.env.ACCESS_TOKEN, (err, same) => {
+    bcrypt.compare(access_key, process.env.ACCESS_KEY, (err, same) => {
       err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
-      console.log(process.env.ACCESS_TOKEN)
+      console.log(process.env.ACCESS_KEY)
       return next();
     });
 
