@@ -192,7 +192,7 @@ sendMail = (req, res, next) => {
   bcrypt.hash(String(req.key), 11, (err, hash) => {
     if(err || !hash) return res.json(err);
     req.keyHash = hash;
-    if(!err) email(auth, eMail, 'YOU HAVE BEEN INVITED', `<a href="http://${req.headers.host}/verify-invite?type=${type}&email=${eMail}&key=${req.key}">VERIFY NOW</a>`,null, req, next);
+    if(!err) email(auth, eMail, 'YOU HAVE BEEN INVITED', `<a href="${process.env.SERVER}/verify-invite?type=${type}&email=${eMail}&key=${req.key}">VERIFY NOW</a>`,null, req, next);
   });  
 }
 
