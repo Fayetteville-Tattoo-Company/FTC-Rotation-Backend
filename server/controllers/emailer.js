@@ -28,6 +28,7 @@ const email =  (auth, to, subject, html, text, req, next) => {
 
   transporter.sendMail(mailOptions, (error, info) => {
     error ? req.sent  = "FAILED" : req.sent = 'SUCCESS';
+    console.log(error);
     return next();
   });
 };
