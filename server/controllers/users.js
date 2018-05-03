@@ -85,7 +85,7 @@ const verifyAccessToken = (req, res, next) => {
 
     // ENVIORNMENT METHOD
     bcrypt.compare(access_token, process.env.ACCESS_TOKEN, (err, same) => {
-      err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
+      err || !same ? req.auth = err : req.auth = 'AUTHORIZED';
       return next();
     });
 
