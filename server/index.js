@@ -9,7 +9,7 @@ const key = process.env.KEY;
 
 
 server.use(cors({
-  origin: "*",
+  origin: `${process.env.SEVER}/*`,
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
   optionsSuccessStatus: 200 
 }));
