@@ -223,6 +223,7 @@ createInvite = (req, res) => {
   Invite.findOne({email: req.body.email, userType: req.body.type})
   .exec((err, invite) => {
     if(err || !invite) return res.json('UNAUTHORIZED');
+    console.log(req.body.image);
     if(invite && req.body.key){
       bcrypt.compare(req.body.key, invite.key, (e, same) => {
         if(e || !same) return res.send('NOPE');
