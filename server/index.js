@@ -7,11 +7,13 @@ const jwt = require('json-web-token');
 const path = require('path');
 const key = process.env.KEY;
 
-server.use(express.json());
+
 server.use(cors({
   origin: process.env.SERVER,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
   optionsSuccessStatus: 200 
 }));
+server.use(express.json());
 
 server.use('/static',express.static(__dirname + '/uploads'), (req, res) => {
  
