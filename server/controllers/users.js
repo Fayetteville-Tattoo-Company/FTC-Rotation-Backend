@@ -71,15 +71,27 @@ const verifyAccessToken = (req, res, next) => {
   if(!req.headers.authorization) return res.send('ACCESS TOKEN REQUIRED');
   const token = req.headers.authorization.split('Bearer ').reverse()[0];
   if(req.status === 'unactive'){
+    const access_token = jwt.decode(key, req.headers.authorization.split('Bearer ').reverse()[0]).value;
+    // DB SETTINGS METHOD
     // verify system access token
-    Settings.findOne({key: 'ACCESS_TOKEN'})
-    .exec((err, setting) => {
-      if(err || !setting) return res.json('Error Finding Setting');
-      bcrypt.compare(token, setting.value, (err, same) => {
-        err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
-        return next();
-      })
-    })
+    // Settings.findOne({key: 'ACCESS_TOKEN'})
+    // .exec((err, setting) => {
+    //   if(err || !setting) return res.json('Error Finding Setting');
+    //   bcrypt.compare(token, setting.value, (err, same) => {
+    //     err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
+    //     return next();
+    //   })
+    // })
+
+    // ENVIORNMENT METHOD
+    bcrypt.compare(access_token, process.env.ACCESS_TOKEN, (err, same) => {
+      err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
+      return next();
+    });
+
+
+
+
   }
   if(req.status === 'active' && req.headers.authorization) {
     req.auth = "UNAUTHORIZED";
