@@ -23,7 +23,6 @@ const findAppointments = (req, res) => {
         return appointment.rotationID.artist.username === user.artist.username
       }));
     });   
-     
   }
 }
 
@@ -41,7 +40,12 @@ addAppointment = (req, res, next) => {
 }
 
 removeAppointment = (req, res) => {
-  res.send(req.params.id);
+  if(!req.master) return res.send('UNAUTHORIZED');
+  Appointment.findByIdAndRemove(req.params.id)
+  .exec((err, appointment) => {
+    res.send(req.params.id + " REMOVED");
+    
+  });
 }
 
 module.exports = {

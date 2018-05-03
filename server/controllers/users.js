@@ -74,7 +74,7 @@ const verifyAccessToken = (req, res, next) => {
     const access_key = jwt.decode(key, req.headers.authorization.split('Bearer ').reverse()[0]).value;
 
     // ENVIORNMENT METHOD
-    bcrypt.compare(access_key, process.env.ACCESS_KEY, (err, same) => {
+    bcrypt.compare(token, process.env.ACCESS_KEY, (err, same) => {
       err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
       return next();
     });
@@ -86,8 +86,10 @@ const verifyAccessToken = (req, res, next) => {
   if(req.status === 'active' && req.headers.authorization) {
     req.auth = "UNAUTHORIZED";
     let user = jwt.decode(key, req.headers.authorization).value;
+    //user = jwt.decode(key, user).value;
     if(!user) return next();
     log(user);
+    console.log(user);
     user.admin ? user = user.admin : user.artist ? user = user.artist : null; 
     Admin.findOne({username: user.username})
     .exec((err, admin) => {
@@ -137,16 +139,21 @@ const verify = (req, res) => {
 
 const createAdmin = (req, res) => {
   if(!req.auth || req.auth === 'UNAUTHORIZED') return res.send("UNAUTHORIZED");
-  const {username, name, password} = jwt.decode(key, req.body.token).value;
+  let master = false;
+  Admin.find({}, (err, admins) => {
+    if(err || !admins.length) master = true;
+    const {username, name, password} = jwt.decode(key, req.body.token).value;
   bcrypt.hash(password, 11, (err, hash) => {
     if(err || !hash) return res.send('FAILED TO ENCRYPT');
-    const admin = new Admin({username, name, hash});
+    const admin = new Admin({username, name, hash, role: master ? 'master' : 'admin'});
     admin.save((e) => {
       if(e) return res.json(e);
       const token = jwt.encode(key, {admin}).value;
       res.json({access: req.auth, token});
     });
   });
+  })
+  
 }
 
 const userExist = (req, res) => {
