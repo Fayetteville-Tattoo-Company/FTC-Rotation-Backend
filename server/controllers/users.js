@@ -89,7 +89,6 @@ const verifyAccessToken = (req, res, next) => {
     //user = jwt.decode(key, user).value;
     if(!user) return next();
     log(user);
-    console.log(user);
     user.admin ? user = user.admin : user.artist ? user = user.artist : null; 
     Admin.findOne({username: user.username})
     .exec((err, admin) => {
