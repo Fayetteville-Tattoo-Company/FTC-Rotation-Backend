@@ -8,7 +8,7 @@ const key = process.env.KEY;
 const server = process.env.SERVER;
 const bcrypt = require('bcrypt');
 const jwt = require('json-web-token');
-const {log, display} = require('../../tools');
+const {log} = require('../../tools');
 
 
 //Check Artist 
@@ -86,7 +86,7 @@ const verifyAccessToken = (req, res, next) => {
     // ENVIORNMENT METHOD
     bcrypt.compare(access_token, process.env.ACCESS_TOKEN, (err, same) => {
       err || !same ? req.auth = "UNAUTHORIZED" : req.auth = 'AUTHORIZED';
-      display(process.env.ACCESS_TOKEN);
+      console.log(process.env.ACCESS_TOKEN)
       return next();
     });
 
