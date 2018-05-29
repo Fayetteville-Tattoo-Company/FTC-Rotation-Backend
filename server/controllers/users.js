@@ -10,7 +10,23 @@ const bcrypt = require('bcrypt');
 const jwt = require('json-web-token');
 const {log} = require('../../tools');
 
+const multer = require('multer');
 
+const storage = multer.diskStorage({destination:(req, file, cb) => {
+  //if(!req.verified || !req.token) return cb('UNATHORIZED ACCESS', null);
+  //const user = jwt.decode(req.token, secret);
+  //multer({dest: `uploads/${user.status}/${user.username}`});
+  //cb(null, `./uploads/${user.status}/${user.username}`);
+  console.log(req.file);
+},
+  filename: (req, file, cb) => {
+   // if(!req.verified || !req.token) return cb('UNATHORIZED ACCESS', null);
+    //const user = jwt.decode(req.token, secret);
+   // cb(null, `profile.jpg`);
+   console.log(req.file);
+  }
+});
+const upload = multer({storage:storage});
 //Check Artist 
 checkArtists = (user, req, next) => {
   if(user)
@@ -88,7 +104,7 @@ const verifyAccessToken = (req, res, next) => {
     let user = jwt.decode(key, req.headers.authorization).value;
     //user = jwt.decode(key, user).value;
     if(!user) return next();
-    log(user);
+    //log(user);
     user.admin ? user = user.admin : user.artist ? user = user.artist : null; 
     Admin.findOne({username: user.username})
     .exec((err, admin) => {
@@ -198,6 +214,7 @@ sendMail = (req, res, next) => {
 addInvite = (req, res) => {
   if(req.sent !== 'SUCCESS') return res.send("FAILED");
   log(req.keyHash);
+  log(req.body);
   Invite.findOne({email: req.body.email})
   .exec((err, invite) => {
     if(err || !invite) {
@@ -218,12 +235,12 @@ addInvite = (req, res) => {
 }
 
 createInvite = (req, res) => {
-  //return res.json(req.body.key);
+  return res.send(req.file);
 
   Invite.findOne({email: req.body.email, userType: req.body.type})
   .exec((err, invite) => {
     if(err || !invite) return res.json('UNAUTHORIZED');
-    console.log(req.body.image);
+    console.log(" ===>" ,req.body);
     if(invite && req.body.key){
       bcrypt.compare(req.body.key, invite.key, (e, same) => {
         if(e || !same) return res.send('NOPE');
@@ -286,5 +303,6 @@ module.exports = {
   addInvite,
   verifyInvite, 
   createInvite,
-  artistCount
+  artistCount,
+  upload
 }
