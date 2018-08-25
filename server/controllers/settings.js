@@ -1,6 +1,5 @@
 const Settings = require('../../data/models/SettingsModel');
 const Artist = require('../../data/models/ArtistModel');
-const jwt = require('json-web-token');
 const key = process.env.KEY;
 
 
@@ -10,6 +9,18 @@ currentRotation = (req, res) => {
   .exec((err, setting) => {
     if(err || !setting) return res.send('SETTING NOT FOUND');
     res.json(setting.value);
+  })
+}
+resetRotation = (req, res) => {
+  if(req.auth !== 'AUTHORIZED') return res.send('UNAUTHORIZED');
+  Settings.findOne({key: 'ROTATION'})
+  .exec((err, setting) => {
+    if(err) return res.send(err.message);
+    setting.value = 0;
+    setting.save((e) => {
+      if(!e) res.json('COUNT RESET');
+    });
+    
   })
 }
 

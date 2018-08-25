@@ -1,16 +1,16 @@
-const jwt = require('json-web-token');
+const jwt = require('jsonwebtoken');
 const key = process.env.KEY;
 const multer = require('multer');
 
 const storage = multer.diskStorage({destination:(req, file, cb) => {
   if(!req.token) return cb('UNATHORIZED ACCESS', null);
-  const user = jwt.decode(key, req.token).value;
+  const user = jwt.decode(key, req.token);
   multer({dest: `uploads/${user.admin ? 'admin' : user.artist ? 'artist' : 'unknown'}/${user.admin ? user.admin.username : user.artist ? user.artist.username : 'unknown'}`});
   cb(null, `./uploads/${user.admin ? 'admin' : user.artist ? 'artist' : 'unknown'}/${user.admin ? user.admin.username : user.artist ? user.artist.username : 'unknown'}`);
 },
   filename: (req, file, cb) => {
     if(!req.token) return cb('UNATHORIZED ACCESS', null);
-    const user = jwt.decode(key, req.token).value;
+    const user = jwt.decode(key, req.token);
     cb(null, `profile.png`);
   }
 });
@@ -23,7 +23,7 @@ const imageUpload = (req, res) => !req.token ? res.json('EROORRRRRR') : res.json
 
 const getImage = (req, res) => {
   if(req.token) return res.send('UNAUTHORIZED');
-  const user = jwt.decode(key, teq.token).value;
+  const user = jwt.decode(key, teq.token);
   res.sendFile(require(`../uploads/${user.admin ? 'admin' : user.artist ? 'artist' : 'unknown'}/${user.username}`));
 };
 
