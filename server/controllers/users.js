@@ -220,7 +220,7 @@ addInvite = (req, res) => {
     if(err || !invite) {
       const newInvite = new Invite({email: req.body.email, key: req.keyHash, userType: req.body.userType});
       newInvite.save((e) => {
-        if(e) return res.json(e);
+        if(e) return res.json(e + 'save error');
         
         if(!e) return res.json(`SUCCESSFULLY SENT INVITE TO ${req.body.email}`);
       })
@@ -262,7 +262,7 @@ createInvite = (req, res) => {
                     .then((re) => log('REMOVED'))
                     .catch((err) => log('ERROR REMOVING'));
 
-                    return res.json({status: 'SUCCESS', token: jwt.sign({...user},key)});
+                    return res.json({status: 'SUCCESS', token: jwt.sign(user,key)});
                   })
               }
             })

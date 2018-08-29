@@ -11,8 +11,9 @@ const email =  (auth, to, subject, html, text, req, next) => {
       secure:true, // true for 465, false for other ports
       auth: {
           user, // SENDER USER
-          pass   // SENDER PASS
-      }
+          pass // SENDER PASS
+      },
+      
     });
 
     // setup email data with unicode symbols
@@ -27,7 +28,7 @@ const email =  (auth, to, subject, html, text, req, next) => {
     // send mail with defined transport object
 
   transporter.sendMail(mailOptions, (error, info) => {
-    error ? req.sent  = "FAILED" : req.sent = 'SUCCESS';
+    error ? req.sent  = "FAILED": req.sent = 'SUCCESS';
     console.log(error);
     return next();
   });

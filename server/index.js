@@ -4,11 +4,10 @@ const express = require('express');
 const cors = require('cors');
 const server = express();
 const path = require('path');
-const key = process.env.KEY;
 
 
 server.use(cors({
-  origin: 'https://ftc-rotation.herokuapp.com',
+  origin: process.env.SERVER,
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
   optionsSuccessStatus: 200 
 }));
