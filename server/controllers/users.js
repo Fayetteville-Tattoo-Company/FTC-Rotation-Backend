@@ -7,7 +7,7 @@ const Invite = require('../../data/models/InviteModel');
 const key = process.env.KEY;
 const server = process.env.SERVER;
 const bcrypt = require('bcrypt');
-const jwt = require('json-web-token');
+const jwt = require('jsonwebtoken');
 const {log} = require('../../tools');
 
 const multer = require('multer');
@@ -49,7 +49,7 @@ checkArtists = (user, req, next) => {
             if(same){
               artist.status = 'artist';            
               req.auth = 'AUTHORIZED';
-              req.token = jwt.encode(key, {artist}).value;
+              req.token = jwt.sign({artist},key);
               req.status = 'artist';
               return next();
             }
@@ -64,7 +64,7 @@ checkArtists = (user, req, next) => {
           if(user.hash === artist.hash){
             req.auth = 'AUTHORIZED';
             artist.status = 'artist';
-            req.token = jwt.encode(key, {artist}).value;
+            req.token = jwt.sign({artist},key);
             req.status = 'artist';
             return next();
           }
@@ -87,7 +87,7 @@ const verifyAccessToken = (req, res, next) => {
   if(!req.headers.authorization) return res.send('ACCESS TOKEN REQUIRED');
   const token = req.headers.authorization.split('Bearer ').reverse()[0];
   if(req.status === 'unactive'){
-    const access_key = jwt.decode(key, req.headers.authorization.split('Bearer ').reverse()[0]).value;
+    const access_key = jwt.decode(req.headers.authorization.split('Bearer ').reverse()[0], key);
 
     // ENVIORNMENT METHOD
     bcrypt.compare(token, process.env.ACCESS_KEY, (err, same) => {
@@ -101,7 +101,7 @@ const verifyAccessToken = (req, res, next) => {
   }
   if(req.status === 'active' && req.headers.authorization) {
     req.auth = "UNAUTHORIZED";
-    let user = jwt.decode(key, req.headers.authorization).value;
+    let user = jwt.decode(req.headers.authorization, key);
     //user = jwt.decode(key, user).value;
     if(!user) return next();
     //log(user);
@@ -114,7 +114,7 @@ const verifyAccessToken = (req, res, next) => {
           if(err || !same) return checkArtists(user, req, next);        
           
           req.auth = 'AUTHORIZED';
-          req.token = jwt.encode(key, {admin}).value;
+          req.token = jwt.sign({admin},key);
           req.status = 'admin';
           user.role === 'master' ? req.master = true : req.master = false;
           
@@ -122,7 +122,7 @@ const verifyAccessToken = (req, res, next) => {
         });
       if(user.hash){
         user.hash !== admin.hash ? req.auth = 'UNAUTHORIZED' : req.auth = 'AUTHORIZED';
-        req.token = jwt.encode(key, {admin}).value;
+        req.token = jwt.sign({admin}, key);
         req.status = 'admin';
         user.role === 'master' ? req.master = true : req.master = false;
         
@@ -157,13 +157,13 @@ const createAdmin = (req, res) => {
   let master = false;
   Admin.find({}, (err, admins) => {
     if(err || !admins.length) master = true;
-    const {username, name, password} = jwt.decode(key, req.body.token).value;
+    const {username, name, password} = jwt.decode(req.body.token, key);
   bcrypt.hash(password, 11, (err, hash) => {
     if(err || !hash) return res.send('FAILED TO ENCRYPT');
     const admin = new Admin({username, name, hash, role: master ? 'master' : 'admin'});
     admin.save((e) => {
       if(e) return res.json(e);
-      const token = jwt.encode(key, {admin}).value;
+      const token = jwt.sign({admin}, key);
       res.json({access: req.auth, token});
     });
   });
@@ -262,7 +262,7 @@ createInvite = (req, res) => {
                     .then((re) => log('REMOVED'))
                     .catch((err) => log('ERROR REMOVING'));
 
-                    return res.json({status: 'SUCCESS', token: jwt.encode(key, user).value});
+                    return res.json({status: 'SUCCESS', token: jwt.sign(user,key)});
                   })
               }
             })
@@ -282,7 +282,7 @@ verifyInvite = (req, res) => {
       bcrypt.compare(req.query.key, invite.key, (e, same) => {
         if(e || !same) return res.send('UNAUTHORIZED');
         if(same){
-          const token = jwt.encode(key, req.query).value;
+          const token = jwt.sign(req.query,key).value;
           res.redirect(`${server}/#${token}`);
         }
       })      
