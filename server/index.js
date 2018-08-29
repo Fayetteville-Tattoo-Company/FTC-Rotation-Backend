@@ -8,7 +8,7 @@ const key = process.env.KEY;
 
 
 server.use(cors({
-  origin: process.env.SERVER,
+  origin: 'https://ftc-rotation.herokuapp.com',
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
   optionsSuccessStatus: 200 
 }));
