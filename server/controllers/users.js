@@ -236,7 +236,6 @@ addInvite = (req, res) => {
 }
 
 createInvite = (req, res) => {
-  return res.send(req.file);
 
   Invite.findOne({email: req.body.email, userType: req.body.type})
   .exec((err, invite) => {
