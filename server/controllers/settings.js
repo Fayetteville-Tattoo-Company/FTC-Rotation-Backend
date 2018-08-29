@@ -44,5 +44,6 @@ rotate = (req, res) => {
 module.exports = {
   currentRotation,
   rotate,
-  addInvite
+  addInvite,
+  resetRotation
 }
