@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const server = express();
-const jwt = require('json-web-token');
 const path = require('path');
 const key = process.env.KEY;
 
