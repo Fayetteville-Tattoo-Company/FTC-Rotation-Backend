@@ -1,7 +1,8 @@
 const {
   currentRotation,
   rotate,
-  addInvite
+  addInvite,
+  resetRotation
 } = require('../controllers/settings');
 const {
   addAppointment
