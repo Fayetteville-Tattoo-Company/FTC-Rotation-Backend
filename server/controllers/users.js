@@ -283,7 +283,7 @@ verifyInvite = (req, res) => {
       bcrypt.compare(req.query.key, invite.key, (e, same) => {
         if(e || !same) return res.send('UNAUTHORIZED');
         if(same){
-          const token = jwt.sign(req.query,key).value;
+          const token = jwt.sign(req.query,key);
           res.redirect(`${server}/#${token}`);
         }
       })      
