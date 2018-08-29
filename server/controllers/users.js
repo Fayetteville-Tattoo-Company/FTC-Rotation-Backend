@@ -257,7 +257,7 @@ createInvite = (req, res) => {
                   null;
                 if(user)
                   user.save((er) => {
-                    if(er) return res.send("FAILED TO SAVE");
+                    //if(er) return res.send("FAILED TO SAVE");
                     Invite.findOneAndRemove({email: req.body.email})
                     .then((re) => log('REMOVED'))
                     .catch((err) => log('ERROR REMOVING'));
