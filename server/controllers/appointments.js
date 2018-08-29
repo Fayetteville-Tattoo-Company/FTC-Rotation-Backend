@@ -9,7 +9,7 @@ const key = process.env.KEY;
 const findAppointments = (req, res) => {
   if(!req.auth || req.auth === 'UNAUTHORIZED' || !req.token) return res.send('UNAUTHORIZED');
   if(req.auth === 'AUTHORIZED'){
-    const user = jwt.decode(key, req.token);
+    const user = jwt.decode(req.token, key);
     
    
     Appointment.find({})
@@ -28,7 +28,7 @@ const findAppointments = (req, res) => {
 
 addAppointment = (req, res, next) => {
   if(req.auth !== 'AUTHORIZED' || req.status !== 'admin') return res.send('UNAUTHORIZED');
-  const creator = jwt.decode(key, req.headers.authorization);
+  const creator = jwt.decode(req.headers.authorization, key);
   const newRotation = new Rotation({artist: req.body.artist});
   newRotation.save((err) => {
     const newAppointment = new Appointment({client: req.body.client, number: req.body.number, date: req.body.date, time: req.body.time, rotationID: newRotation._id, createdAt: Date.now()});
