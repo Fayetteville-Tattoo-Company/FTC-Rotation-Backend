@@ -221,6 +221,7 @@ addInvite = (req, res) => {
       const newInvite = new Invite({email: req.body.email, key: req.keyHash, userType: req.body.userType});
       newInvite.save((e) => {
         if(e) return res.json(e);
+        
         if(!e) return res.json(`SUCCESSFULLY SENT INVITE TO ${req.body.email}`);
       })
     }
