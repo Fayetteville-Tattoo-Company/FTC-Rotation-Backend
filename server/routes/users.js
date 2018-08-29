@@ -20,7 +20,7 @@ module.exports = (route) => {
   route.get('/exist/:username', checkSystem, userExist);
   route.get('/artists', checkSystem, verifyAccessToken, getArtists);
   route.post('/create-admin',checkSystem, verifyAccessToken, createAdmin);
-  route.post('/invite-signup', checkSystem,artistCount,upload.single('image'), createInvite);
+  route.post('/invite-signup', checkSystem,artistCount, createInvite);
   route.post('/invite',checkSystem, verifyAccessToken, sendMail, addInvite);
   route.get('/verify-invite', checkSystem, verifyInvite);
  
