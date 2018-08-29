@@ -262,7 +262,7 @@ createInvite = (req, res) => {
                     .then((re) => log('REMOVED'))
                     .catch((err) => log('ERROR REMOVING'));
 
-                    return res.json({status: 'SUCCESS', token: jwt.sign(user,key)});
+                    return res.json({status: 'SUCCESS', token: jwt.sign({...user},key)});
                   })
               }
             })
