@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "set NODE_ENV=production&& nodemon server/server.js",
+    "start": "set NODE_ENV=production&& node server/server.js",
     "dev": "set NODE_ENV=development&& start mongod --dbpath data/db --port 7777&& nodemon server/server.js"
   },
   "keywords": [],
