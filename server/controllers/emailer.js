@@ -4,11 +4,8 @@ const email =  (auth, to, subject, html, text, req, next) => {
    //sender email
   const user = auth.user;
   const pass = auth.pass; //sender password
-  const host = auth.host; //sender email provider
     const transporter = nodemailer.createTransport({
-      host,
-      port: 465,
-      secure:true, // true for 465, false for other ports
+      service: 'Gmail',
       auth: {
           user, // SENDER USER
           pass // SENDER PASS

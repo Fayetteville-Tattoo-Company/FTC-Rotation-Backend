@@ -197,9 +197,9 @@ getArtists = (req, res) => {
 sendMail = (req, res, next) => {
   if(!req.master || req.auth !== 'AUTHORIZED') return res.json('UNAUTHORIZED');
   const auth = {
-    user: 'track7dev.testing@gmail.com',
-    pass: 'PA$$W0rd',
-    host: 'smtp.gmail.com'
+    user: process.env.E_USER,
+    pass: process.env.E_PASS,
+    service: process.env.E_SERVICE
   }
   const eMail = req.body.email ;
   const type = req.body.userType ;
@@ -207,7 +207,8 @@ sendMail = (req, res, next) => {
   bcrypt.hash(String(req.key), 11, (err, hash) => {
     if(err || !hash) return res.json(err);
     req.keyHash = hash;
-    if(!err) email(auth, eMail, 'YOU HAVE BEEN INVITED', `<a href="https://${req.headers.host}/verify-invite?type=${type}&email=${eMail}&key=${req.key}">VERIFY NOW</a>`,null, req, next);
+    console.log(res);
+    if(!err) email(auth, eMail, 'YOU HAVE BEEN INVITED', `<a href="${process.env.NODE_ENV === 'production' ? 'https://' : 'http://'}${req.headers.host}/verify-invite?type=${type}&email=${eMail}&key=${req.key}">VERIFY NOW</a>`,null, req, next);
   });  
 }
 
@@ -257,12 +258,12 @@ createInvite = (req, res) => {
                   null;
                 if(user)
                   user.save((er) => {
-                    //if(er) return res.send("FAILED TO SAVE");
+                    if(er) return res.send("FAILED TO SAVE");
                     Invite.findOneAndRemove({email: req.body.email})
                     .then((re) => log('REMOVED'))
                     .catch((err) => log('ERROR REMOVING'));
 
-                    return res.json({status: 'SUCCESS', token: jwt.sign(user,key)});
+                    return res.json({status: 'SUCCESS', token: jwt.sign({user},key)});
                   })
               }
             })
