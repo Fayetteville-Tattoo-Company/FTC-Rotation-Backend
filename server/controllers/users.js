@@ -222,16 +222,16 @@ addInvite = (req, res) => {
     if(err || !invite) {
       const newInvite = new Invite({email: req.body.email, key: req.keyHash, userType: req.body.userType});
       newInvite.save((e) => {
-        if(e) return res.json(e + 'save error');
+        if(e) return res.json({status: 'failed', message:'Save Error: ' + e});
         
-        if(!e) return res.json(`SUCCESSFULLY SENT INVITE TO ${req.body.email}`);
+        if(!e) return res.json({status: 'success', message:`SUCCESSFULLY SENT INVITE TO ${req.body.email}`});
       })
     }
     if(invite){
         invite.key = req.keyHash;
         invite.userType = req.body.userType;
         invite.save((e) => {
-          if(!e) return res.send("RESENT EMAIL");
+          if(!e) return res.send({status: 'success', message: "RESENT EMAIL"});
         })
     }
   })
