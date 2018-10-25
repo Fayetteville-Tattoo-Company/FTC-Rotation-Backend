@@ -213,7 +213,7 @@ sendMail = (req, res, next) => {
 }
 
 addInvite = (req, res) => {
-  if(req.sent !== 'SUCCESS') return res.send("FAILED");
+  if(req.sent !== 'SUCCESS') return res.send(req.sent);
   log(req.keyHash);
   log(req.body);
   Invite.findOne({email: req.body.email})

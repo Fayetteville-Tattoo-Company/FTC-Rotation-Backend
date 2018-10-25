@@ -5,7 +5,7 @@ const email =  (auth, to, subject, html, text, req, next) => {
   const user = auth.user;
   const pass = auth.pass; //sender password
     const transporter = nodemailer.createTransport({
-      service: 'Gmail',
+      service: auth.service,
       auth: {
           user, // SENDER USER
           pass // SENDER PASS
@@ -25,7 +25,7 @@ const email =  (auth, to, subject, html, text, req, next) => {
     // send mail with defined transport object
 
   transporter.sendMail(mailOptions, (error, info) => {
-    error ? req.sent  = "FAILED": req.sent = 'SUCCESS';
+    error ? req.sent  = 'FAILED' + error: req.sent = 'SUCCESS';
     console.log(error);
     return next();
   });
