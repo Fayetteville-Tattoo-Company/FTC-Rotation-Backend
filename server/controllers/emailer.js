@@ -10,7 +10,7 @@ const email =  (auth, to, subject, html, text, req, next) => {
           user, // SENDER USER
           pass // SENDER PASS
       },
-      localAddress: process.env.SERVER
+      localAddress: "104.248.225.17"
       
     });
 
