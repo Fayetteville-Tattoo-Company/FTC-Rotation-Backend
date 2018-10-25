@@ -213,6 +213,7 @@ sendMail = (req, res, next) => {
 }
 
 addInvite = (req, res) => {
+  console.log(process.env.E_USER, process.env.E_SERVICE, process.env.E_PASS);
   if(req.sent !== 'SUCCESS') return res.send(req.sent);
   log(req.keyHash);
   log(req.body);
