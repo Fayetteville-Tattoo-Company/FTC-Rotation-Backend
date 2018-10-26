@@ -22,6 +22,7 @@ const email =  (auth, to, subject, html, text, req, next) => {
     // send mail with defined transport object
 
   transporter.sendMail(mailOptions, (error, info) => {
+    console.log(mailOptions);
     error ? req.sent  = {status:'FAILED', message:error.message}: req.sent = 'SUCCESS';
     console.log(error);
     return next();
