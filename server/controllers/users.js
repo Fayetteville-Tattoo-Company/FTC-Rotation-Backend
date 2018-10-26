@@ -204,7 +204,6 @@ sendMail = (req, res, next) => {
     pass: process.env.E_PASS,
     service: process.env.E_SERVICE
   }
-  console.log(auth);
   const eMail = req.body.email ;
   const type = req.body.userType ;
   req.key = Math.floor(Math.random() * 7777777);

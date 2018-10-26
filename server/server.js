@@ -7,7 +7,7 @@ mongoose.Promise = global.Promise;
 const connect = mongoose.connect(mongoURI);
 connect.then(() => {
   log("MongoDB Server Running : 7777");
-  server.listen(port, () => console.log(`Main Server Running : ${port} --> ${process.env.NODE_ENV} : DB ${mongoURI}`));
+  server.listen(port, () => console.log(`Main Server Running : ${port} --> ${process.env.NODE_ENV}`));
 })
 .catch((err) => log(err));
 
