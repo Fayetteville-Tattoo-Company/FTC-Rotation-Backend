@@ -18,7 +18,7 @@ resetRotation = (req, res) => {
     if(err) return res.send(err.message);
     setting.value = 0;
     setting.save((e) => {
-      if(!e) res.json('COUNT RESET');
+      if(!e) res.json(`COUNT RESET TO ${setting.value}`);
     });
     
   })

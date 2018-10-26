@@ -77,7 +77,10 @@ checkArtists = (user, req, next) => {
 const checkSystem = (req, res, next) => {
   Admin.find({})
   .exec((err, r) => { 
+    //log(`START: SYSTEM CHECK`);
     err || !r.length ?  req.status = 'unactive' : req.status = 'active';
+    //log(`STATUS ${req.status}`);
+    //log(`END: SYSTEM CHECK`);
     return next();
   });
 }
@@ -136,11 +139,11 @@ const verifyAccessToken = (req, res, next) => {
 artistCount = (req, res, next) => {
   Artist.find({})
   .exec((err, artists) => {
-    if(err || !artists.length){
-      req.count = 0;
-      return next();
-    }
-    req.count = artists.length;
+    log('\nSTART: ARTIST COUNT');
+    log(`ERROR: ${err}`);
+    req.count = artists.length || 0;
+    log(`ARTIST: ${req.count}`)
+    log('END: ARTIST COUNT\n');
     next(); 
   })
 }
@@ -207,49 +210,49 @@ sendMail = (req, res, next) => {
   bcrypt.hash(String(req.key), 11, (err, hash) => {
     if(err || !hash) return res.json(err);
     req.keyHash = hash;
-    console.log(res);
     if(!err) email(auth, eMail, 'YOU HAVE BEEN INVITED', `<a href="${process.env.NODE_ENV === 'production' ? 'https://' : 'http://'}${req.headers.host}/verify-invite?type=${type}&email=${eMail}&key=${req.key}">VERIFY NOW</a>`,null, req, next);
   });  
 }
 
 addInvite = (req, res) => {
-  console.log(process.env.E_USER, process.env.E_SERVICE, process.env.E_PASS);
+
   if(req.sent !== 'SUCCESS') return res.send(req.sent);
-  log(req.keyHash);
-  log(req.body);
+
   Invite.findOne({email: req.body.email})
   .exec((err, invite) => {
     if(err || !invite) {
       const newInvite = new Invite({email: req.body.email, key: req.keyHash, userType: req.body.userType});
-      newInvite.save((e) => {
-        if(e) return res.json({status: 'failed', message:'Save Error: ' + e});
-        
-        if(!e) return res.json({status: 'success', message:`SUCCESSFULLY SENT INVITE TO ${req.body.email}`});
-      })
+      newInvite.save((e) => 
+        e ? 
+        res.json({status: 'FAILED', message:`Save Error: ${e}`})
+        :
+        res.json({status: 'SUCCESS', message:`Sent An Invite To ${req.body.email}`})
+      )
     }
     if(invite){
-        invite.key = req.keyHash;
-        invite.userType = req.body.userType;
-        invite.save((e) => {
-          if(!e) return res.send({status: 'success', message: "RESENT EMAIL"});
-        })
+      invite.key = req.keyHash;
+      invite.userType = req.body.userType;
+      invite.save((e) =>
+        e ? 
+          res.send({status: 'FAILED', message: `Failed To Resend Email To ${req.body.email}`})
+          : 
+          res.send({status: 'SUCCESS', message: `Resent Invite To ${req.body.email}`})
+      )
     }
   })
 }
 
 createInvite = (req, res) => {
-
   Invite.findOne({email: req.body.email, userType: req.body.type})
   .exec((err, invite) => {
     if(err || !invite) return res.json('UNAUTHORIZED');
-    console.log(" ===>" ,req.body);
     if(invite && req.body.key){
       bcrypt.compare(req.body.key, invite.key, (e, same) => {
-        if(e || !same) return res.send('NOPE');
+        if(e || !same) return res.json({status: 'FAILED', message: 'UNAUTHORIZED'});
         if(same){
           
             bcrypt.hash(req.body.pass, 11, (err, hash) => {
-              if(err || !hash) return res.json('ENCRYPTION FAILURE');
+              if(err || !hash) return res.json({status:"FAILED", message: "FAILED ENCRYPTION"});
               if(hash){
                 const user = 
                   req.body.type === 'admin' ? 
@@ -259,17 +262,14 @@ createInvite = (req, res) => {
                   null;
                 if(user)
                   user.save((er) => {
-                    if(er) return res.send("FAILED TO SAVE");
+                    if(er) return res.send({status:"FAILED", message: "FAILED TO SAVE USER"});
                     Invite.findOneAndRemove({email: req.body.email})
-                    .then((re) => log('REMOVED'))
-                    .catch((err) => log('ERROR REMOVING'));
-
-                    return res.json({status: 'SUCCESS', token: jwt.sign({user},key)});
-                  })
+                    .then((re) => res.json({status: 'SUCCESS', token: jwt.sign({user},key), message: `User ${user.username} Created`}))
+                    .catch((err) => res.json({status: 'FAILED', message:'ERROR REMOVING '}));
+                  }); 
               }
-            })
-          
-          
+            }
+          )        
         }
       })      
     }
